@@ -27,11 +27,18 @@ class MainWindow(ctk.CTk):
         super().__init__()
         
         self.title("CV-Forge - Générateur de CV ATS")
-        self.geometry("1000x750")
+        self.geometry("1200x850")
         
         # Set appearance
         ctk.set_appearance_mode("dark")
         ctk.set_default_color_theme("blue")
+        
+        # Icons/emojis for better visual feedback
+        self.save_icon = "💾"
+        self.load_icon = "📂"
+        self.pdf_icon = "📄"
+        self.docx_icon = "📝"
+        self.refresh_icon = "🔄"
         
         self.resume = Resume()
         self.profiles_path = Path(__file__).parent.parent / "data" / "profiles.json"
@@ -41,90 +48,134 @@ class MainWindow(ctk.CTk):
     
     def _build_ui(self):
         """Build the main UI with tabs and action buttons."""
-        # Main container with grid
+        # Configure grid layout
         self.grid_columnconfigure(0, weight=1)
         self.grid_rowconfigure(0, weight=1)
+        self.grid_rowconfigure(1, weight=0)
+        
+        # Header frame with title and description
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.grid(row=0, column=0, sticky="nsew", padx=15, pady=(15, 0))
+        header_frame.grid_columnconfigure(0, weight=1)
+        header_frame.grid_rowconfigure(1, weight=1)
+        
+        # Title
+        title_label = ctk.CTkLabel(
+            header_frame,
+            text="CV-Forge",
+            font=("Helvetica", 28, "bold")
+        )
+        title_label.grid(row=0, column=0, sticky="w", pady=(0, 5))
+        
+        # Subtitle
+        subtitle_label = ctk.CTkLabel(
+            header_frame,
+            text="Générateur de CV optimisé pour les systèmes ATS",
+            font=("Helvetica", 12),
+            text_color="gray"
+        )
+        subtitle_label.grid(row=1, column=0, sticky="w", pady=(0, 10))
         
         # Tab view
-        self.tabview = ctk.CTkTabview(self)
-        self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
+        self.tabview = ctk.CTkTabview(header_frame)
+        self.tabview.grid(row=2, column=0, sticky="nsew", pady=(0, 15))
+        header_frame.grid_rowconfigure(2, weight=1)
         
         # Create tabs
-        self.tab_personal = self.tabview.add("Informations personnelles")
-        self.tab_education = self.tabview.add("Formation")
-        self.tab_certifications = self.tabview.add("Certifications")
-        self.tab_experience = self.tabview.add("Expériences")
-        self.tab_skills = self.tabview.add("Compétences")
-        self.tab_preview = self.tabview.add("Aperçu")
+        self.tab_personal = self.tabview.add("👤 Infos Personnelles")
+        self.tab_education = self.tabview.add("🎓 Formation")
+        self.tab_certifications = self.tabview.add("🏆 Certifications")
+        self.tab_experience = self.tabview.add("💼 Expériences")
+        self.tab_skills = self.tabview.add("⭐ Compétences")
+        self.tab_preview = self.tabview.add("👁️ Aperçu")
         
-        # Add forms to tabs
+        # Add forms to tabs with scrollable frames
         self.personal_form = PersonalInfoFrame(self.tab_personal)
-        self.personal_form.pack(fill="both", expand=True, padx=10, pady=10)
+        self.personal_form.pack(fill="both", expand=True, padx=15, pady=15)
         
         self.education_form = EducationFrame(self.tab_education)
-        self.education_form.pack(fill="both", expand=True, padx=10, pady=10)
+        self.education_form.pack(fill="both", expand=True, padx=15, pady=15)
         
         self.certification_form = CertificationFrame(self.tab_certifications)
-        self.certification_form.pack(fill="both", expand=True, padx=10, pady=10)
+        self.certification_form.pack(fill="both", expand=True, padx=15, pady=15)
         
         self.experience_form = ExperienceFrame(self.tab_experience)
-        self.experience_form.pack(fill="both", expand=True, padx=10, pady=10)
+        self.experience_form.pack(fill="both", expand=True, padx=15, pady=15)
         
         self.skills_form = SkillsFrame(self.tab_skills)
-        self.skills_form.pack(fill="both", expand=True, padx=10, pady=10)
+        self.skills_form.pack(fill="both", expand=True, padx=15, pady=15)
         
-        # Preview tab
-        self.preview_frame = ctk.CTkFrame(self.tab_preview)
-        self.preview_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        # Preview tab with controls
+        preview_container = ctk.CTkFrame(self.tab_preview)
+        preview_container.pack(fill="both", expand=True, padx=15, pady=15)
         
-        self.preview_text = ctk.CTkTextbox(self.preview_frame, width=800, height=500)
-        self.preview_text.pack(fill="both", expand=True)
+        self.preview_text = ctk.CTkTextbox(preview_container, width=800, height=500)
+        self.preview_text.pack(fill="both", expand=True, pady=(0, 10))
         
-        update_btn = ctk.CTkButton(self.preview_frame, text="Actualiser l'aperçu", command=self._update_preview)
-        update_btn.pack(pady=10)
+        update_btn = ctk.CTkButton(
+            preview_container,
+            text=f"{self.refresh_icon} Actualiser l'aperçu",
+            command=self._update_preview,
+            height=40,
+            font=("Helvetica", 12)
+        )
+        update_btn.pack(fill="x", pady=5)
         
         # Action buttons frame
         self.btn_frame = ctk.CTkFrame(self)
-        self.btn_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=10)
+        self.btn_frame.grid(row=1, column=0, sticky="ew", padx=15, pady=15)
+        self.btn_frame.grid_columnconfigure(1, weight=1)
         
-        # Left side buttons
+        # Left side buttons (Profile management)
         left_frame = ctk.CTkFrame(self.btn_frame, fg_color="transparent")
-        left_frame.pack(side="left", padx=10)
+        left_frame.grid(row=0, column=0, sticky="w", padx=5)
         
         ctk.CTkButton(
             left_frame,
-            text="Sauvegarder Profil",
+            text=f"{self.save_icon} Sauvegarder",
             command=self._save_profile,
-            width=150,
+            width=160,
+            height=40,
+            font=("Helvetica", 11),
+            fg_color="#27ae60",
+            hover_color="#229954"
         ).pack(side="left", padx=5)
         
         ctk.CTkButton(
             left_frame,
-            text="Charger Profil",
+            text=f"{self.load_icon} Charger",
             command=self._load_profile,
-            width=150,
-        ).pack(side="left", padx=5)
-        
-        # Right side buttons (export)
-        right_frame = ctk.CTkFrame(self.btn_frame, fg_color="transparent")
-        right_frame.pack(side="right", padx=10)
-        
-        ctk.CTkButton(
-            right_frame,
-            text="Exporter PDF",
-            command=self._export_pdf,
-            width=150,
-            fg_color="#e74c3c",
-            hover_color="#c0392b",
-        ).pack(side="left", padx=5)
-        
-        ctk.CTkButton(
-            right_frame,
-            text="Exporter DOCX",
-            command=self._export_docx,
-            width=150,
+            width=160,
+            height=40,
+            font=("Helvetica", 11),
             fg_color="#3498db",
-            hover_color="#2980b9",
+            hover_color="#2980b9"
+        ).pack(side="left", padx=5)
+        
+        # Right side buttons (Export)
+        right_frame = ctk.CTkFrame(self.btn_frame, fg_color="transparent")
+        right_frame.grid(row=0, column=2, sticky="e", padx=5)
+        
+        ctk.CTkButton(
+            right_frame,
+            text=f"{self.pdf_icon} Exporter PDF",
+            command=self._export_pdf,
+            width=160,
+            height=40,
+            font=("Helvetica", 11),
+            fg_color="#e74c3c",
+            hover_color="#c0392b"
+        ).pack(side="left", padx=5)
+        
+        ctk.CTkButton(
+            right_frame,
+            text=f"{self.docx_icon} Exporter DOCX",
+            command=self._export_docx,
+            width=160,
+            height=40,
+            font=("Helvetica", 11),
+            fg_color="#9b59b6",
+            hover_color="#8e44ad"
         ).pack(side="left", padx=5)
     
     def _collect_form_data(self) -> Resume:
