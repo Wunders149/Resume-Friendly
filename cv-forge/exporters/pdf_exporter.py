@@ -8,14 +8,7 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
 from reportlab.lib.units import inch
 from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, KeepTogether
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
 
-import sys
-from pathlib import Path
-
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
 from models.resume import Resume
 
 
@@ -29,94 +22,91 @@ class PDFExporter:
     
     def _setup_styles(self):
         """Configure styles for ATS-compatible PDF."""
-        # Base style - Arial font for ATS compatibility
-        try:
-            # Try to register Arial if available (Windows)
-            pdfmetrics.registerFont(TTFont('Arial', 'C:\\Windows\\Fonts\\arial.ttf'))
-            font_name = 'Arial'
-        except:
-            font_name = 'Helvetica'  # Fallback
+        font_name = 'Helvetica'  # Default fallback
         
         # Normal text style
         self.styles['Normal'].fontName = font_name
         self.styles['Normal'].fontSize = 11
         
         # Section title style
-        self.styles.add(ParagraphStyle(
-            name='SectionTitle',
-            parent=self.styles['Heading2'],
-            fontName=font_name,
-            fontSize=12,
-            textColor=colors.black,
-            spaceBefore=12,
-            spaceAfter=6,
-            textTransform='uppercase',
-        ))
+        if 'SectionTitle' not in self.styles:
+            self.styles.add(ParagraphStyle(
+                name='SectionTitle',
+                parent=self.styles['Heading2'],
+                fontName=font_name,
+                fontSize=12,
+                textColor=colors.black,
+                spaceBefore=12,
+                spaceAfter=6,
+                textTransform='uppercase',
+            ))
         
         # Header name style
-        self.styles.add(ParagraphStyle(
-            name='HeaderName',
-            parent=self.styles['Heading1'],
-            fontName=font_name,
-            fontSize=16,
-            alignment=1,  # Center
-            spaceAfter=6,
-        ))
+        if 'HeaderName' not in self.styles:
+            self.styles.add(ParagraphStyle(
+                name='HeaderName',
+                parent=self.styles['Heading1'],
+                fontName=font_name,
+                fontSize=16,
+                alignment=1,  # Center
+                spaceAfter=6,
+            ))
         
         # Contact info style
-        self.styles.add(ParagraphStyle(
-            name='ContactInfo',
-            parent=self.styles['Normal'],
-            fontName=font_name,
-            fontSize=10,
-            alignment=1,  # Center
-            spaceAfter=12,
-        ))
+        if 'ContactInfo' not in self.styles:
+            self.styles.add(ParagraphStyle(
+                name='ContactInfo',
+                parent=self.styles['Normal'],
+                fontName=font_name,
+                fontSize=10,
+                alignment=1,  # Center
+                spaceAfter=12,
+            ))
         
         # Bullet style
-        self.styles.add(ParagraphStyle(
-            name='Bullet',
-            parent=self.styles['Normal'],
-            fontName=font_name,
-            fontSize=11,
-            leftIndent=20,
-            spaceAfter=3,
-        ))
+        if 'CustomBullet' not in self.styles:
+            self.styles.add(ParagraphStyle(
+                name='CustomBullet',
+                parent=self.styles['Normal'],
+                fontName=font_name,
+                fontSize=11,
+                leftIndent=20,
+                spaceAfter=3,
+            ))
     
     def export(self, filepath: str) -> None:
-        """
-        Export the resume to a PDF file.
-        
-        Args:
-            filepath: Path to save the PDF file
-        """
-        doc = SimpleDocTemplate(
-            filepath,
-            pagesize=A4,
-            leftMargin=0.75 * inch,
-            rightMargin=0.75 * inch,
-            topMargin=0.75 * inch,
-            bottomMargin=0.75 * inch,
-        )
-        
-        story = []
-        
-        # Build the resume content
-        self._build_header(story)
-        self._build_profile(story)
-        self._build_education(story)
-        self._build_certifications(story)
-        self._build_experiences(story)
-        self._build_skills(story)
-        
-        doc.build(story)
+        """Export the resume to a PDF file."""
+        try:
+            doc = SimpleDocTemplate(
+                filepath,
+                pagesize=A4,
+                leftMargin=0.75 * inch,
+                rightMargin=0.75 * inch,
+                topMargin=0.75 * inch,
+                bottomMargin=0.75 * inch,
+            )
+            
+            story = []
+            
+            self._build_header(story)
+            self._build_profile(story)
+            self._build_education(story)
+            self._build_certifications(story)
+            self._build_experiences(story)
+            self._build_skills(story)
+            
+            doc.build(story)
+        except PermissionError:
+            raise Exception(f"Accès refusé: Impossible d'écrire le fichier {filepath}")
+        except IOError as e:
+            raise Exception(f"Erreur d'entrée/sortie: {str(e)}")
+        except Exception as e:
+            raise Exception(f"Erreur lors de la génération du PDF: {str(e)}")
     
     def _build_header(self, story: list) -> None:
         """Add resume header with contact information."""
-        # Name
         story.append(Paragraph(self.resume.full_name, self.styles['HeaderName']))
         
-        # Contact info
         contact_lines = []
         if self.resume.phone:
             contact_lines.append(self.resume.phone)
@@ -181,11 +171,10 @@ class PDFExporter:
             dates_range = f"{exp.start_date} – {exp.end_date}"
             exp_header = f"{exp.position} – {exp.company} – {exp.city} – {dates_range}"
             
-            # Use KeepTogether to keep job entry together
             job_story = [Paragraph(exp_header, self.styles['Normal'])]
             
             for bullet in exp.bullets:
-                job_story.append(Paragraph(f"• {bullet}", self.styles['Bullet']))
+                job_story.append(Paragraph(f"• {bullet}", self.styles['CustomBullet']))
             
             story.append(KeepTogether(job_story))
             story.append(Spacer(1, 6))
@@ -201,12 +190,13 @@ class PDFExporter:
         story.append(Paragraph("COMPETENCES", self.styles['SectionTitle']))
         
         if self.resume.skills_hard:
-            skills_text = "<b>Compétences Techniques:</b><br/>"
+            skills_text = "<b>Competences Techniques:</b><br/>"
             skills_text += "<br/>".join([f"• {skill}" for skill in self.resume.skills_hard])
             story.append(Paragraph(skills_text, self.styles['Normal']))
             story.append(Spacer(1, 12))
         
         if self.resume.skills_soft:
-            skills_text = "<b>Compétences Comportementales:</b><br/>"
+            skills_text = "<b>Competences Comportementales:</b><br/>"
             skills_text += "<br/>".join([f"• {skill}" for skill in self.resume.skills_soft])
             story.append(Paragraph(skills_text, self.styles['Normal']))
+            story.append(Spacer(1, 0.1 * inch))

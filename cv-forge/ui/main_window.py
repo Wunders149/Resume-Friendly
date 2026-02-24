@@ -8,11 +8,7 @@ from tkinter import filedialog, messagebox
 import json
 from pathlib import Path
 
-import sys
-# Add parent directory to path for imports
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from models.resume import Resume
+from models.resume import Resume, Education, Certification, Experience
 from exporters.docx_exporter import DOCXExporter
 from exporters.pdf_exporter import PDFExporter
 from ui.forms import (
@@ -31,7 +27,7 @@ class MainWindow(ctk.CTk):
         super().__init__()
         
         self.title("CV-Forge - Générateur de CV ATS")
-        self.geometry("900x700")
+        self.geometry("1000x750")
         
         # Set appearance
         ctk.set_appearance_mode("dark")
@@ -45,9 +41,13 @@ class MainWindow(ctk.CTk):
     
     def _build_ui(self):
         """Build the main UI with tabs and action buttons."""
+        # Main container with grid
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(0, weight=1)
+        
         # Tab view
         self.tabview = ctk.CTkTabview(self)
-        self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
+        self.tabview.grid(row=0, column=0, sticky="nsew", padx=10, pady=10)
         
         # Create tabs
         self.tab_personal = self.tabview.add("Informations personnelles")
@@ -55,6 +55,7 @@ class MainWindow(ctk.CTk):
         self.tab_certifications = self.tabview.add("Certifications")
         self.tab_experience = self.tabview.add("Expériences")
         self.tab_skills = self.tabview.add("Compétences")
+        self.tab_preview = self.tabview.add("Aperçu")
         
         # Add forms to tabs
         self.personal_form = PersonalInfoFrame(self.tab_personal)
@@ -72,9 +73,19 @@ class MainWindow(ctk.CTk):
         self.skills_form = SkillsFrame(self.tab_skills)
         self.skills_form.pack(fill="both", expand=True, padx=10, pady=10)
         
+        # Preview tab
+        self.preview_frame = ctk.CTkFrame(self.tab_preview)
+        self.preview_frame.pack(fill="both", expand=True, padx=10, pady=10)
+        
+        self.preview_text = ctk.CTkTextbox(self.preview_frame, width=800, height=500)
+        self.preview_text.pack(fill="both", expand=True)
+        
+        update_btn = ctk.CTkButton(self.preview_frame, text="Actualiser l'aperçu", command=self._update_preview)
+        update_btn.pack(pady=10)
+        
         # Action buttons frame
         self.btn_frame = ctk.CTkFrame(self)
-        self.btn_frame.pack(fill="x", padx=10, pady=10)
+        self.btn_frame.grid(row=1, column=0, sticky="ew", padx=10, pady=10)
         
         # Left side buttons
         left_frame = ctk.CTkFrame(self.btn_frame, fg_color="transparent")
@@ -134,8 +145,6 @@ class MainWindow(ctk.CTk):
             profile=personal_data["profile"],
         )
         
-        from models.resume import Education, Certification, Experience
-        
         for edu in education_data:
             self.resume.education.append(Education(**edu))
         
@@ -149,6 +158,83 @@ class MainWindow(ctk.CTk):
         self.resume.skills_soft = skills_data["skills_soft"]
         
         return self.resume
+    
+    def _update_preview(self):
+        """Update the preview tab with current resume data."""
+        resume = self._collect_form_data()
+        
+        preview_content = []
+        
+        # Header
+        preview_content.append("=" * 60)
+        preview_content.append(resume.full_name.center(60))
+        preview_content.append("=" * 60)
+        
+        contact_lines = []
+        if resume.phone:
+            contact_lines.append(resume.phone)
+        if resume.email:
+            contact_lines.append(resume.email)
+        if resume.linkedin:
+            contact_lines.append(resume.linkedin)
+        if resume.address:
+            contact_lines.append(resume.address)
+        
+        if contact_lines:
+            preview_content.append(" | ".join(contact_lines).center(60))
+        
+        preview_content.append("")
+        
+        # Profile
+        if resume.profile:
+            preview_content.append("PROFIL")
+            preview_content.append("-" * 40)
+            preview_content.append(resume.profile)
+            preview_content.append("")
+        
+        # Education
+        if resume.education:
+            preview_content.append("FORMATION")
+            preview_content.append("-" * 40)
+            for edu in resume.education:
+                preview_content.append(f"  {edu.diploma} – {edu.institution} – {edu.dates}")
+            preview_content.append("")
+        
+        # Certifications
+        if resume.certifications:
+            preview_content.append("CERTIFICATION")
+            preview_content.append("-" * 40)
+            for cert in resume.certifications:
+                preview_content.append(f"  {cert.name} – {cert.organization} – {cert.year}")
+            preview_content.append("")
+        
+        # Experiences
+        if resume.experiences:
+            preview_content.append("EXPERIENCES PROFESSIONNELLES")
+            preview_content.append("-" * 40)
+            for exp in resume.experiences:
+                dates_range = f"{exp.start_date} – {exp.end_date}"
+                preview_content.append(f"  {exp.position} – {exp.company} – {exp.city} – {dates_range}")
+                for bullet in exp.bullets:
+                    preview_content.append(f"    • {bullet}")
+            preview_content.append("")
+        
+        # Skills
+        if resume.skills_hard or resume.skills_soft:
+            preview_content.append("COMPETENCES")
+            preview_content.append("-" * 40)
+            if resume.skills_hard:
+                preview_content.append("  Competences Techniques:")
+                for skill in resume.skills_hard:
+                    preview_content.append(f"    • {skill}")
+            if resume.skills_soft:
+                preview_content.append("  Competences Comportementales:")
+                for skill in resume.skills_soft:
+                    preview_content.append(f"    • {skill}")
+        
+        # Update textbox
+        self.preview_text.delete("1.0", "end")
+        self.preview_text.insert("1.0", "\n".join(preview_content))
     
     def _export_pdf(self):
         """Export resume to PDF."""
@@ -168,9 +254,9 @@ class MainWindow(ctk.CTk):
             try:
                 exporter = PDFExporter(resume)
                 exporter.export(filepath)
-                messagebox.showinfo("Succès", f"CV exporté avec succès:\n{filepath}")
+                messagebox.showinfo("Succès", f"CV exporté avec succès ✓\n{filepath}")
             except Exception as e:
-                messagebox.showerror("Erreur", f"Erreur lors de l'export PDF:\n{str(e)}")
+                messagebox.showerror("Erreur d'export", f"Erreur lors de l'export PDF:\n{str(e)}")
     
     def _export_docx(self):
         """Export resume to DOCX."""
@@ -190,9 +276,9 @@ class MainWindow(ctk.CTk):
             try:
                 exporter = DOCXExporter(resume)
                 exporter.export(filepath)
-                messagebox.showinfo("Succès", f"CV exporté avec succès:\n{filepath}")
+                messagebox.showinfo("Succès", f"CV exporté avec succès ✓\n{filepath}")
             except Exception as e:
-                messagebox.showerror("Erreur", f"Erreur lors de l'export DOCX:\n{str(e)}")
+                messagebox.showerror("Erreur d'export", f"Erreur lors de l'export DOCX:\n{str(e)}")
     
     def _save_profile(self):
         """Save current profile to JSON file."""
@@ -266,7 +352,19 @@ class MainWindow(ctk.CTk):
     
     def _populate_forms(self, data: dict):
         """Populate all forms with loaded profile data."""
-        # Clear existing entries
+        # Destroy existing forms
+        for widget in self.tab_personal.winfo_children():
+            widget.destroy()
+        for widget in self.tab_education.winfo_children():
+            widget.destroy()
+        for widget in self.tab_certifications.winfo_children():
+            widget.destroy()
+        for widget in self.tab_experience.winfo_children():
+            widget.destroy()
+        for widget in self.tab_skills.winfo_children():
+            widget.destroy()
+        
+        # Recreate forms
         self.personal_form = PersonalInfoFrame(self.tab_personal)
         self.personal_form.pack(fill="both", expand=True, padx=10, pady=10)
         

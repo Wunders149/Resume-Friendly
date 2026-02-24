@@ -2,41 +2,14 @@
   "Philibert RAZAFIMAHEFA": {
     "first_name": "Philibert",
     "last_name": "RAZAFIMAHEFA",
-    "phone": "+261 32 26 881 48",
-    "email": "razafimahefaphilibert7@gmail.com",
+    "phone": "",
+    "email": "",
     "linkedin": "",
-    "address": "La Corniche",
-    "profile": "STEM Educator and Computer Science graduate with strong experience integrating robotics, AI, and digital tools into interactive learning environments. English Club Moderator and STEM Club Leader with proven ability to facilitate dynamic, student-centered sessions for middle school, high school, and university learners. Passionate about transforming traditional lecture-based teaching into engaging, project-based, and technology-driven English learning experiences. Specialized in integrating robotics and computing vocabulary into practical, hands-on activities that foster confidence, collaboration, and critical thinking.",
-    "education": [
-      {
-        "diploma": "Master’s Degree in Computer Science\n",
-        "institution": "Institut de Formation Technique (IFT), Mahajanga",
-        "dates": "2024 – 2026"
-      }
-    ],
-    "certifications": [
-      {
-        "name": "Artificial Intelligence & Robotics Certification",
-        "organization": "American Corner Mahajanga",
-        "year": "2025"
-      }
-    ],
-    "experiences": [
-      {
-        "position": "STEM Club Leader",
-        "company": "\nAmerican Corner Mahajanga (ACM)",
-        "city": "Mahajanga",
-        "start_date": "2024",
-        "end_date": "Present",
-        "bullets": [
-          "Led weekly robotics and coding workshops for 20+ students",
-          "Designed interactive STEM learning modules",
-          "Integrated English vocabulary into robotics and programming activities",
-          "Organized science fairs and project presentations",
-          "Mentored students in innovation competitions"
-        ]
-      }
-    ],
+    "address": "",
+    "profile": "",
+    "education": [],
+    "certifications": [],
+    "experiences": [],
     "skills_hard": [],
     "skills_soft": []
   }

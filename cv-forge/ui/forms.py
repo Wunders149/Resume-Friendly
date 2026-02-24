@@ -27,37 +27,37 @@ class PersonalInfoFrame(ctk.CTkFrame):
         
         # First Name
         ctk.CTkLabel(self, text="Prénom:").grid(row=0, column=0, padx=10, pady=5, sticky="e")
-        self.first_name_entry = ctk.CTkEntry(self, width=300)
+        self.first_name_entry = ctk.CTkEntry(self, width=350)
         self.first_name_entry.grid(row=0, column=1, padx=10, pady=5, sticky="w")
         
         # Last Name
         ctk.CTkLabel(self, text="Nom:").grid(row=1, column=0, padx=10, pady=5, sticky="e")
-        self.last_name_entry = ctk.CTkEntry(self, width=300)
+        self.last_name_entry = ctk.CTkEntry(self, width=350)
         self.last_name_entry.grid(row=1, column=1, padx=10, pady=5, sticky="w")
         
         # Phone
         ctk.CTkLabel(self, text="Téléphone:").grid(row=2, column=0, padx=10, pady=5, sticky="e")
-        self.phone_entry = ctk.CTkEntry(self, width=300)
+        self.phone_entry = ctk.CTkEntry(self, width=350)
         self.phone_entry.grid(row=2, column=1, padx=10, pady=5, sticky="w")
         
         # Email
         ctk.CTkLabel(self, text="Email:").grid(row=3, column=0, padx=10, pady=5, sticky="e")
-        self.email_entry = ctk.CTkEntry(self, width=300)
+        self.email_entry = ctk.CTkEntry(self, width=350)
         self.email_entry.grid(row=3, column=1, padx=10, pady=5, sticky="w")
         
         # LinkedIn
         ctk.CTkLabel(self, text="LinkedIn:").grid(row=4, column=0, padx=10, pady=5, sticky="e")
-        self.linkedin_entry = ctk.CTkEntry(self, width=300)
+        self.linkedin_entry = ctk.CTkEntry(self, width=350)
         self.linkedin_entry.grid(row=4, column=1, padx=10, pady=5, sticky="w")
         
         # Address
         ctk.CTkLabel(self, text="Adresse:").grid(row=5, column=0, padx=10, pady=5, sticky="e")
-        self.address_entry = ctk.CTkEntry(self, width=300)
+        self.address_entry = ctk.CTkEntry(self, width=350)
         self.address_entry.grid(row=5, column=1, padx=10, pady=5, sticky="w")
         
         # Profile Summary
         ctk.CTkLabel(self, text="Profil:").grid(row=6, column=0, padx=10, pady=5, sticky="ne")
-        self.profile_text = ctk.CTkTextbox(self, width=400, height=100)
+        self.profile_text = ctk.CTkTextbox(self, width=350, height=100)
         self.profile_text.grid(row=6, column=1, padx=10, pady=5, sticky="w")
     
     def get_data(self) -> dict:
@@ -418,14 +418,25 @@ class SkillsFrame(ctk.CTkFrame):
         self.soft_list_label.configure(text="\n".join([f"• {s}" for s in self.soft_skills]))
     
     def get_data(self) -> dict:
+        # Always read from textboxes to get current user input
+        hard_raw = self.hard_text.get("1.0", "end-1c")
+        soft_raw = self.soft_text.get("1.0", "end-1c")
+        
+        hard_skills = [s.strip() for s in hard_raw.split("\n") if s.strip()]
+        soft_skills = [s.strip() for s in soft_raw.split("\n") if s.strip()]
+        
         return {
-            "skills_hard": self.hard_skills,
-            "skills_soft": self.soft_skills,
+            "skills_hard": hard_skills,
+            "skills_soft": soft_skills,
         }
     
     def set_data(self, data: dict):
         self.hard_skills = data.get("skills_hard", [])
         self.soft_skills = data.get("skills_soft", [])
+        
+        # Clear textboxes first
+        self.hard_text.delete("1.0", "end")
+        self.soft_text.delete("1.0", "end")
         
         self.hard_text.insert("1.0", "\n".join(self.hard_skills))
         self.soft_text.insert("1.0", "\n".join(self.soft_skills))

@@ -10,6 +10,12 @@ Usage:
 """
 
 import customtkinter as ctk
+import sys
+from pathlib import Path
+
+# Add cv-forge directory to path
+sys.path.insert(0, str(Path(__file__).parent))
+
 from ui.main_window import MainWindow
 
 
