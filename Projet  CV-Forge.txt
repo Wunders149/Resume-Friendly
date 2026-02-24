@@ -1,0 +1,209 @@
+Projet : CV-Forge
+
+Un générateur de CV optimisé ATS en application Desktop Python.
+
+🎯 Objectif
+
+Créer une application desktop qui :
+
+Génère un CV 100% compatible ATS
+
+Structure proprement les sections
+
+Exporte en PDF et DOCX
+
+Évite les éléments problématiques (colonnes, icônes, images inutiles)
+
+Force une structure standardisée
+
+On ne fait pas du design Canva.
+On fait du CV machine-readable, scannable, efficace.
+
+🧱 Stack Technique
+
+Je te propose :
+
+Python 3.11+
+
+Tkinter (léger, natif, stable)
+ou
+
+CustomTkinter (plus moderne visuellement)
+
+python-docx → génération DOCX
+
+reportlab → génération PDF propre
+
+json → sauvegarde des profils
+
+Optionnel : sqlite3 → stockage local multi-profils
+
+🏗 Architecture du Projet
+cv-forge/
+│
+├── main.py
+├── ui/
+│   ├── main_window.py
+│   ├── forms.py
+│
+├── models/
+│   ├── resume.py
+│
+├── exporters/
+│   ├── docx_exporter.py
+│   ├── pdf_exporter.py
+│
+├── data/
+│   └── profiles.json
+│
+└── assets/
+
+On sépare :
+
+UI
+
+Modèle de données
+
+Export
+
+Stockage
+
+Propre. Evolutif. Ingénieur.
+
+🧠 Structure ATS du CV
+1️⃣ En-tête
+
+Format texte simple :
+
+PHILIBERT RAKOTO
++261 34 00 000 00 | phil@example.com
+linkedin.com/in/philibert
+
+⚠️ Pas de tableau
+⚠️ Pas d’icône
+⚠️ Pas de colonne
+
+2️⃣ Accroche / Profil
+
+Court. Direct.
+Doit contenir le titre exact du poste visé.
+
+Exemple :
+
+Software Developer spécialisé en applications web Angular et PHP, avec expérience en développement full-stack et conception d’outils optimisés ATS.
+
+Le mot-clé du poste doit apparaître clairement.
+
+3️⃣ Formation
+
+Format strict :
+
+Licence en Informatique – Institut de Formation Technique – 2021–2024
+
+Toujours :
+Diplôme – Établissement – Dates
+
+4️⃣ Certification
+
+Même logique :
+
+Certification Angular – OpenClassrooms – 2025
+5️⃣ Expériences Professionnelles
+
+Format obligatoire :
+
+Développeur Web – Company X – Antananarivo – 06/2023 – 01/2024
+• Développement d’une application Angular.
+• Optimisation des performances backend PHP.
+
+Toujours :
+Poste – Entreprise – Ville – Dates (MM/YYYY)
+
+6️⃣ Compétences
+
+Séparer proprement :
+
+Compétences Techniques :
+• Angular
+• TypeScript
+• PHP
+• MySQL
+
+Compétences Comportementales :
+• Leadership
+• Travail en équipe
+• Communication
+
+Simple. Scan-friendly.
+
+🖥 Interface Utilisateur
+Fenêtre principale :
+
+Onglet 1 : Informations personnelles
+
+Onglet 2 : Formation
+
+Onglet 3 : Certifications
+
+Onglet 4 : Expériences
+
+Onglet 5 : Compétences
+
+Bouton : Exporter PDF
+
+Bouton : Exporter DOCX
+
+Bouton : Sauvegarder Profil
+
+🧩 Modèle de Données
+
+Exemple resume.py :
+
+class Resume:
+    def __init__(self):
+        self.first_name = ""
+        self.last_name = ""
+        self.phone = ""
+        self.email = ""
+        self.linkedin = ""
+        self.profile = ""
+        self.education = []
+        self.certifications = []
+        self.experiences = []
+        self.skills_hard = []
+        self.skills_soft = []
+
+Simple. Extensible.
+
+💎 Fonctionnalités Avancées (Version 2)
+
+🔎 Analyse des mots-clés ATS
+
+🧠 Score de compatibilité avec une offre d’emploi
+
+🎯 Détection automatique des verbes d’action
+
+📄 Export multi-modèles
+
+🌍 Version multilingue
+
+Là on entre dans le sérieux.
+
+🏆 Pourquoi ce projet est stratégique pour toi
+
+Philibert…
+Tu es informaticien.
+Tu connais Angular, TypeScript, PHP.
+
+Ce projet peut devenir :
+
+Un SaaS plus tard
+
+Une app distribuée localement
+
+Un outil pour étudiants malgaches
+
+Un produit à monétiser
+
+C’est un produit réel.
+Pas juste un projet GitHub décoratif.
